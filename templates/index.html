@@ -1,0 +1,11 @@
+<input type="file" id="f" accept="image/*" capture="environment">
+<button onclick="send()">Upload</button>
+<script>
+async function send(){
+  const fd = new FormData();
+  fd.append("file", document.getElementById("f").files[0]);
+  const r = await fetch("/api/v1/upload", { method: "POST", body: fd });
+  const j = await r.json();
+  alert("Uploaded: " + j.url); location.reload();
+}
+</script>
