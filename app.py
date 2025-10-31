@@ -43,9 +43,12 @@ def upload():
     if not allowed_file(file.content_type):
         return jsonify(ok=False, error="Invalid file type. Must be image/*"), 400
 
-    if len(file.read()) > 10 * 1024 * 1024:  # 10 MB limit
+    # Check file size (10 MB limit)
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    if size > 10 * 1024 * 1024:
         return jsonify(ok=False, error="File too large (>10MB)"), 400
-    file.seek(0)  # reset pointer
 
     safe_name = secure_filename(file.filename)
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S")
@@ -79,7 +82,8 @@ def gallery():
 
 @app.get("/api/v1/health")
 def health():
-    return "OK", 200
+    # ✅ Return valid JSON to avoid JSONDecodeError
+    return jsonify(ok=True, status="healthy"), 200
 
 
 @app.get("/")
@@ -89,3 +93,4 @@ def index():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
