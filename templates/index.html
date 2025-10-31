@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lanternfly Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; text-align: center; margin: 20px; }
+    img { width: 90%; max-width: 400px; margin: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <h2>🪰 Lanternfly Tracker</h2>
+  <input type="file" id="f" accept="image/*" capture="environment">
+  <button onclick="send()">Upload</button>
+  <div id="gallery"></div>
+
+  <script>
+    async function send() {
+      const file = document.getElementById("f").files[0];
+      if (!file) return alert("Select an image first!");
+      const fd = new FormData();
+      fd.append("file", file);
+      const r = await fetch("/api/v1/upload", { method: "POST", body: fd });
+      const j = await r.json();
+      if (j.ok) {
+        alert("Uploaded: " + j.url);
+        loadGallery();
+      } else alert("Error: " + j.error);
+    }
+
+    async function loadGallery() {
+      const r = await fetch("/api/v1/gallery");
+      const j = await r.json();
+      if (!j.ok) return alert("Failed to load gallery");
+      const g = document.getElementById("gallery");
+      g.innerHTML = "";
+      j.gallery.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        g.appendChild(img);
+      });
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html>
